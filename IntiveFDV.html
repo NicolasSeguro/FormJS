@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Intive-FDV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="dist/css/bootstrap.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style type="text/css"> 
+    body{background: #DDD;} h2{text-align: center;}
+    .btn-outline-primary, .form-control{border-radius:0;}
+    .form-control{display: inline-block;width: auto;}
+    .container{margin: 5px;}
+    .table thead th{border:none;}
+    .table td, .table th{border-color: #666;}
+</style>
+</head>
+<body>
+    <h2 class="text-primary">Intive-FDV Exercise</h2>
+    <div class="d-flex flex-row container">
+        <div class="container p-2 flex-fill ">
+            <div>
+                <div class="row">
+                    <label class="col-md-6 p-2  text-primary">Name:</label>
+                    <input class="col-md-6 p-2  form-control border border-primary" type="text" 
+                    name="firstname" placeholder="name here" id="firstname">
+                
+                </div>
+                <div class="row">
+                    <label class="col-md-6 p-2 text-primary">Last name:</label>
+                    <input class="col-md-6 p-2 form-control border border-primary" type="text" 
+                    name="lastname" placeholder="name here" id="lastname">
+                </div>
+                <div class="row">
+                    <label class="col-md-6 p-2 text-primary">Country:</label>
+                    <select class="col-md-6 p-2 form-control border border-primary" id="ddCountries"></select>
+                </div>
+                <div class="row">
+                    <label class="col-md-6 p-2 text-primary">Birthday:</label>
+                    <input class="col-md-6 p-2 form-control border border-primary" type="text" 
+                    name="birthday" placeholder="mm/dd/yyyy" id="birthday">
+                </div>
+              <br>
+    
+              
+              <div class="text-right">
+                  <input class="btn btn-outline-primary border border-primary" type="button" 
+                  value="save" onclick="javascript:save();refresh();">
+              </div>
+            </div> 
+    
+    
+            <div id="salute" class="alert alert-success"></div>
+        </div>
+        <div class="container p-2 flex-fill"> 
+            <table id="tblPersonas" class="table table-reflow border border-primary"></table>
+        </div> 
+    </div> 
+    <script type="text/javascript">
+        var personas=[];
+        populateCountries();
+    
+        function populateCountries(){
+            $.get("https://restcountries.eu/rest/v2/all",{},function(data)
+            {
+                
+                var countries_result = data;
+    
+                countries_result.forEach(function(country){
+                    $("#ddCountries").append("<option value='" + country.name + "'>" + country.name + "</option>");
+                });
+            });
+        }
+    
+        function diff_date_in_years(dt1, dt2)
+        {
+            var nYears  =  dt1.getUTCFullYear() - dt2.getUTCFullYear();
+            return nYears;
+        }
+    
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+        function save()
+        {
+            var firstname =  $("#firstname").val();
+            var country   =  $("#ddCountries").val();
+            var lastname  =  $("#lastname").val();
+            var birthday  =  $("#birthday").val();
+    
+            var birthdate = new Date(birthday);
+            var years = diff_date_in_years(new Date(), birthdate);
+    
+            $("#salute").text("Hola {0} from {1}  on {2} of {3} you will have {4}".format(firstname, country, birthdate.getDate(), monthNames[birthdate.getMonth()] , years));
+    
+            personas.push({
+                firstname: firstname, 
+                lastname: lastname, 
+                country: country, 
+                birthday: birthday
+            });
+    
+    
+        }
+    
+        function refresh()
+        {
+            $("#tblPersonas").html("");
+            $("#tblPersonas").append("<thead><th>name</th><th>country</th> <th>birthday</th></thead>");
+            personas.forEach(function(x){
+                var tr = $("<tr>").append($("<td>").text(x.firstname))
+                $("#tblPersonas").append("<tr><td>"+x.firstname+" "+x.lastname+"</td><td>"+x.country+"</td><td>"+x.birthday+"</td></tr>");
+            });
+        }
+    
+        // First, checks if it isn't implemented yet.
+        if (!String.prototype.format) {
+          String.prototype.format = function() {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function(match, number) { 
+              return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+              ;
+            });
+          };
+        }
+    
+    </script>
+    
+    </body>
+    </html>
